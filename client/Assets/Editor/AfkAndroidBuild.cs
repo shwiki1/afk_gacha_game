@@ -53,6 +53,8 @@ public static class AfkAndroidBuild
             !EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android))
             throw new InvalidOperationException("Could not switch Unity to the Android build target.");
 
+        // Unity's Android ARM64 player requires the IL2CPP backend.
+        PlayerSettings.SetScriptingBackend(BuildTargetGroup.Android, ScriptingImplementation.IL2CPP);
         PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
         Debug.Log($"AFK Android target: {EditorUserBuildSettings.activeBuildTarget}, " +
                   $"architectures={PlayerSettings.Android.targetArchitectures}");
