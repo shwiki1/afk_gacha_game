@@ -51,6 +51,10 @@ public static class AfkAndroidBuild
                   $"errors={summary.totalErrors}, warnings={summary.totalWarnings}, size={summary.totalSize}");
         if (summary.result != BuildResult.Succeeded)
             throw new InvalidOperationException($"Android build failed with {summary.totalErrors} error(s).");
+
+        // GameCI recognizes this exact marker. Unity can report non-fatal
+        // import issues in totalErrors while still producing a valid player.
+        Debug.Log("Build succeeded!");
     }
 
     private static string GetArgument(string name, string fallback)
