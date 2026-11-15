@@ -13,26 +13,30 @@ jobs:
     # GameCI editor images and the Unity Editor are x86_64 Linux binaries.
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout client and private Asset Store dependencies
+      - name: Checkout client
         uses: actions/checkout@v4
         with:
           submodules: false
 
-      # The public client repository omits paid / licensed Asset Store imports,
-      # and client/ProjectSettings/ProjectSettings.asset is gitignored.
-      # Populate AFK_ASSETS_ARCHIVE_BASE64 with a .tar.gz whose root contains
-      # those restored directories and files. Keep it in a GitHub Secret.
+      # Keep licensed Asset Store files in a private repository. A large
+      # Base64 archive cannot fit in GitHub's repository Secret size limit.
+      - name: Checkout private Unity assets
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.AFK_ASSETS_REPO }}
+          token: ${{ secrets.AFK_ASSETS_TOKEN }}
+          ref: main
+          path: .afk-private-assets
+          persist-credentials: false
+
       - name: Restore Unity project dependencies
-        env:
-          AFK_ASSETS_ARCHIVE_BASE64: ${{ secrets.AFK_ASSETS_ARCHIVE_BASE64 }}
         run: |
-          if [ -z "$AFK_ASSETS_ARCHIVE_BASE64" ]; then
-            echo "::error::AFK_ASSETS_ARCHIVE_BASE64 is required: restore Asset Store imports and ProjectSettings.asset first."
-            exit 1
-          fi
-          printf '%s' "$AFK_ASSETS_ARCHIVE_BASE64" | base64 --decode > "$RUNNER_TEMP/afk-assets.tar.gz"
-          tar -xzf "$RUNNER_TEMP/afk-assets.tar.gz" -C client
-          rm -f "$RUNNER_TEMP/afk-assets.tar.gz"
+          test -f .afk-private-assets/ProjectSettings/ProjectSettings.asset
+          test -d .afk-private-assets/Assets/ThirdParty
+          rsync -a .afk-private-assets/Assets/ client/Assets/
+          install -Dm644 \
+            .afk-private-assets/ProjectSettings/ProjectSettings.asset \
+            client/ProjectSettings/ProjectSettings.asset
 
       - name: Cache Unity Library
         uses: actions/cache@v4
