@@ -28,15 +28,15 @@
 - 以后配置私有素材仓库时，根目录必须包含 `Assets/ThirdParty` 和 `ProjectSettings/ProjectSettings.asset`，还要包含 README 要求的其他合法 Asset Store 导入文件。大型素材不要放进 Secret，Token 只需要该私有仓库的 `Contents: Read` 权限。
 - 2026-11-15 在 fork 上实测：Android workflow 能启动；旧的 `game-ci/unity-request-activation-file@v2` 已实测返回“不再支持”，所以已删除该 activation workflow。远端 Ubuntu 24.04 x86_64 已实测 Personal 激活成功并读回，随后已执行 `license return` 和 `auth logout` 释放席位；本机 ARM64 CLI 仍不支持 licensing client。
 - 公开源码首次编译还缺少 Asset Store 的 `DuloGames.UIProgressBar` 类型；项目只使用其 `fillAmount`。已加入 `client/Assets/Scripts/ThirdPartyCompat/DuloGamesCompat.cs` 作为独立编写的最小编译兼容层，没有复制 Asset Store 源码；后续可以用 AI 生成的 UI 图形替换进度条外观。
-- 验收状态：GitHub Actions 已完成 Personal 激活、Unity 编译、APK 归档和本地 APK 校验；客户端/服务端联机、真实设备安装和完整视觉验收仍未完成。当前 APK 使用默认包名 `com.DefaultCompany.client`、版本 `1.0 (1)`、仅 `armeabi-v7a`，并由 Android Debug 证书签名；要做可覆盖升级的正式包，需要配置固定包名、版本号、ARM64 架构和 Android keystore。
+- 验收状态：GitHub Actions 已完成 Personal 激活、Unity IL2CPP 编译、ARM64 APK 归档和本地 APK 校验；客户端/服务端联机、真实设备安装和完整视觉验收仍未完成。当前 APK 使用默认包名 `com.DefaultCompany.client`、版本 `1.0 (11)`、`arm64-v8a`，并由 Android Debug 证书签名；要做可覆盖升级的正式包，需要配置固定包名、版本号和 Android keystore。
 
 ## 本次构建记录
 
 - GitHub fork：`https://github.com/shwiki1/afk_gacha_game`
-- 提交：`eaba136814e7b5453ef74fe38ff51a186c21186f`
-- Actions：`https://github.com/shwiki1/afk_gacha_game/actions/runs/43754487898`
-- Artifact：`AFKGacha-Android`，约 `102,088,400` bytes；本地文件为 `构建产物/43754487898/Android/AFKGacha.apk`。
-- SHA-256：`b8d290336ddd84831a19fc5f674305f8435f69919d09c44a6f2ec5e3ec43a47c`
+- 提交：`66fa304515dded22a5a6692ee81f333f9f377de9`
+- Actions：`https://github.com/shwiki1/afk_gacha_game/actions/runs/43758881628`
+- Artifact：`AFKGacha-Android`，约 `106,803,232` bytes；本地文件为 `构建产物/43758881628/Android/AFKGacha.apk`。
+- APK：`arm64-v8a`、IL2CPP、versionCode `11`；SHA-256：`a6764cd14366c76eedf28f3ed0099a5ca626d21ac1d6220bcfaa71c776bad575`
 - 校验：`unzip -t`、`zipalign -c -v 4`、`apksigner verify` 均通过；签名方案为 v1/v2。
 
 ## 相关链接
