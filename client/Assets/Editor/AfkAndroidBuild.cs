@@ -42,6 +42,7 @@ public static class AfkAndroidBuild
             scenes = enabledScenes,
             locationPathName = outputPath,
             target = BuildTarget.Android,
+            targetGroup = BuildTargetGroup.Android,
             options = BuildOptions.None
         };
 
