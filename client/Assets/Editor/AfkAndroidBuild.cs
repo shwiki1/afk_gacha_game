@@ -46,9 +46,18 @@ public static class AfkAndroidBuild
             options = BuildOptions.None
         };
 
-        // The development device is arm64-v8a-only. Keep the CI artifact
-        // installable there and use the workflow run number for upgrades.
+        // The development device is arm64-v8a-only. Switch the active target
+        // before changing Android PlayerSettings, otherwise Unity can ignore
+        // the architecture setter while the project is still on Standalone.
+        if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android &&
+            !EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android))
+            throw new InvalidOperationException("Could not switch Unity to the Android build target.");
+
         PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
+        Debug.Log($"AFK Android target: {EditorUserBuildSettings.activeBuildTarget}, " +
+                  $"architectures={PlayerSettings.Android.targetArchitectures}");
+
+        // Use the workflow run number for upgrades.
         var versionCode = GetArgument("-androidVersionCode", "");
         if (int.TryParse(versionCode, out var parsedVersionCode) && parsedVersionCode > 0)
             PlayerSettings.Android.bundleVersionCode = parsedVersionCode;
