@@ -18,21 +18,32 @@ public class SocketConnection : MonoBehaviour
     public bool connected = false;
 
     private WebSocketMessageEventHandler currentMessageHandler;
+    private bool connecting;
 
-    async void Start()
+    IEnumerator Start()
     {
+        // ServerSelect initializes its static endpoint in Awake. Waiting one
+        // frame also makes this resilient when the two components are in
+        // different scene objects with unspecified execution order.
+        yield return null;
         Init();
     }
 
     public void Init()
     {
+        if (Instance != null && Instance != this)
+        {
+            Debug.LogWarning("Duplicate SocketConnection ignored.");
+            return;
+        }
+
         Instance = this;
         DontDestroyOnLoad(gameObject);
+        ServerSelect.EnsureDefaults();
 
-        if (!connected)
+        if (!connected && !connecting)
         {
-            connected = true;
-            ConnectToSession();
+            _ = ConnectToSessionAsync();
         }
     }
 
@@ -41,35 +52,89 @@ public class SocketConnection : MonoBehaviour
 #if !UNITY_WEBGL || UNITY_EDITOR
         if (ws != null)
         {
-            ws.DispatchMessageQueue();
+            try
+            {
+                ws.DispatchMessageQueue();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"WebSocket message dispatch failed: {ex.Message}");
+            }
         }
 #endif
     }
 
     private async void OnApplicationQuit()
     {
-        await this.CloseConnection();
+        try
+        {
+            await CloseConnection();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"WebSocket shutdown failed: {ex.Message}");
+        }
     }
 
-    private void ConnectToSession()
+    private async Task ConnectToSessionAsync()
     {
-        string url = $"{ServerSelect.Domain}/2";
-        ws = new WebSocket(url);
-        ws.OnMessage += OnWebSocketMessage;
-        ws.OnClose += OnWebsocketClose;
-        ws.OnOpen += () =>
+        connecting = true;
+        WebSocket socket = null;
+
+        try
         {
-            GetUserAndContinue();
-        };
-        ws.OnError += (e) =>
+            ServerSelect.EnsureDefaults();
+            if (!TryBuildWebSocketUrl(ServerSelect.Domain, out var url))
+            {
+                throw new InvalidOperationException($"Invalid WebSocket domain: {ServerSelect.Domain}");
+            }
+
+            socket = new WebSocket(url);
+            ws = socket;
+            socket.OnMessage += OnWebSocketMessage;
+            socket.OnClose += (closeCode) => OnWebsocketClose(socket, closeCode);
+            socket.OnOpen += () =>
+            {
+                connected = true;
+                connecting = false;
+                try
+                {
+                    GetUserAndContinue();
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"Initial user request failed: {ex.Message}");
+                }
+            };
+            socket.OnError += (e) =>
+            {
+                Debug.LogError($"WebSocket error for {url}: {e}");
+            };
+
+            await socket.Connect();
+        }
+        catch (Exception ex)
         {
-            Debug.LogError("Received error: " + e);
-        };
-        ws.Connect();
+            if (ReferenceEquals(ws, socket))
+            {
+                ws = null;
+                connected = false;
+                connecting = false;
+            }
+
+            Debug.LogError($"WebSocket connection failed: {ex.GetType().Name}: {ex.Message}");
+        }
     }
 
-    private void OnWebsocketClose(WebSocketCloseCode closeCode)
+    private void OnWebsocketClose(WebSocket socket, WebSocketCloseCode closeCode)
     {
+        if (ReferenceEquals(ws, socket))
+        {
+            ws = null;
+            connected = false;
+            connecting = false;
+        }
+
         if (closeCode != WebSocketCloseCode.Normal)
         {
             // Errors.Instance.HandleNetworkError(connectionTitle, connectionDescription);
@@ -98,11 +163,45 @@ public class SocketConnection : MonoBehaviour
 
     public async Task CloseConnection()
     {
-        if (connected && this.ws != null)
+        var socket = ws;
+        ws = null;
+        connected = false;
+        connecting = false;
+
+        if (socket != null)
         {
-            await this.ws.Close();
-            connected = false;
+            try
+            {
+                if (socket.State == WebSocketState.Open)
+                {
+                    await socket.Close();
+                }
+                else
+                {
+                    socket.CancelConnection();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"WebSocket close failed: {ex.Message}");
+            }
         }
+    }
+
+    private static bool TryBuildWebSocketUrl(string domain, out string url)
+    {
+        url = (domain ?? string.Empty).Trim().TrimEnd('/');
+        if (string.IsNullOrEmpty(url) ||
+            !Uri.TryCreate(url, UriKind.Absolute, out var uri) ||
+            (!string.Equals(uri.Scheme, "ws", StringComparison.OrdinalIgnoreCase) &&
+             !string.Equals(uri.Scheme, "wss", StringComparison.OrdinalIgnoreCase)))
+        {
+            url = string.Empty;
+            return false;
+        }
+
+        url += "/2";
+        return true;
     }
 
     private void OnWebSocketMessage(byte[] data)
