@@ -11,6 +11,7 @@ Last updated: 2026-11-15 22:52 UTC
 - Build branch: `main` on `shwiki1/afk_gacha_game`
 - Cloud build: `.github/workflows/android-build.yml`; formatting workflow: `.github/workflows/dotnet-format.yml`
 - App version: `1.0`
+- Build number: `12`
 - Last completed build number: `12`
 - Last completed artifact: `构建产物/43769884864/Android/AFKGacha.apk`
 - Last artifact SHA-256: `120cefb6a02adeba6bd8d30ddb131b43f7954a0dd41ab7d6e60914263949c39f`

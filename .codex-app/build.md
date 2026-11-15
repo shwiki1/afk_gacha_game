@@ -17,6 +17,8 @@
 - Prior successful run: `43758881628`, versionCode `11`
 
 ## Version Management
+- Canonical version file: `client/ProjectSettings/ProjectSettings.asset`.
+- Current build number: `12`.
 - User-facing version source: `client/ProjectSettings/ProjectSettings.asset` when the full checkout is present; current value is `1.0`.
 - Build number source: workflow `androidVersionCode: ${{ github.run_number }}`.
 - Version bump policy: increment the cloud build number for every APK; change user-facing version only for a release change.
