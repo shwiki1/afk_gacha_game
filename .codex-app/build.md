@@ -14,11 +14,11 @@
 - Build method: `AfkAndroidBuild.Build`
 - Artifact: `AFKGacha-Android`, APK under `build/**/*.apk`
 - Build number: GitHub Actions `github.run_number` becomes Android `versionCode`
-- Prior successful run: `43758881628`, versionCode `11`
+- Prior successful run: `43773761459`, versionCode `13`
 
 ## Version Management
 - Canonical version file: `client/ProjectSettings/ProjectSettings.asset`.
-- Current build number: `12`.
+- Current build number: `13`.
 - User-facing version source: `client/ProjectSettings/ProjectSettings.asset` when the full checkout is present; current value is `1.0`.
 - Build number source: workflow `androidVersionCode: ${{ github.run_number }}`.
 - Version bump policy: increment the cloud build number for every APK; change user-facing version only for a release change.
@@ -34,7 +34,7 @@
 ## Test Matrix
 - Source checks: changed scripts reviewed and endpoint/state transitions inspected.
 - Network smoke: WebSocket `101/open` handshake to `ws://156.254.7.63:4001/2` passed.
-- CI build: passed, run `43769884864` in `17m24s`.
+- CI build: passed, run `43773761459` in `14m39s`.
 - APK checks after CI: ABI, versionCode, `unzip -t`, `zipalign`, `apksigner`, and SHA-256.
 - Device smoke: pending a connected Android device; install and logcat are required for final launch-loop confirmation.
 
@@ -46,4 +46,4 @@
 ## Notes
 - The public working tree is sparse; GitHub Actions checks out the full repository and restores private assets only when configured.
 - Use GitHub Actions for native packaging and keep secrets out of commits.
-- Current artifact: `构建产物/43769884864/Android/AFKGacha.apk`, versionCode `12`, SHA-256 `120cefb6a02adeba6bd8d30ddb131b43f7954a0dd41ab7d6e60914263949c39f`.
+- Current artifact: `构建产物/43773761459/Android/AFKGacha.apk`, versionCode `13`, SHA-256 `482b9d39b8da92e7dd38f989bc93e7c77fe7f5d0543f6e96eed9603dfd5c7a6e`.
