@@ -1,0 +1,18 @@
+# 只填写等号右侧内容。不要把这个模板改名后提交到 GitHub。
+# 你可以复制为「GitHub构建配置.local.txt」后用记事本填写。
+
+# Unity 账号。邮箱已经是当前登录账号；密码填 Unity 登录密码。
+UNITY_EMAIL=2840522462@qq.com
+UNITY_PASSWORD=
+
+# 没有素材仓库时保持为空，先尝试公开源码构建。
+# 以后有合法素材时再填写，例如 shwiki1/afk_gacha_assets。
+AFK_ASSETS_REPO=
+AFK_ASSETS_TOKEN=
+
+# 可选：Android 发布签名。测试 APK 可以留空。
+ANDROID_KEYSTORE_NAME=
+ANDROID_KEYSTORE_BASE64=
+ANDROID_KEYSTORE_PASS=
+ANDROID_KEYALIAS_NAME=
+ANDROID_KEYALIAS_PASS=

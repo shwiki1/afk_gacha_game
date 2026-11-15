@@ -11,7 +11,7 @@
 
 - 客户端公开仓库约 1473 个文件，包含脚本、场景、贴图、模型、音频、`Packages` 与大部分 `ProjectSettings`。本机检出为 sparse checkout，只展开了脚本、工程设置、Editor、workflow 目录。
 - README 要求自行购买/下载并导入 8 组 Asset Store 素材到 `client/Assets/ThirdParty`；仓库里仅保留了少量目录 `.meta`，`client/ProjectSettings/ProjectSettings.asset` 也被 `.gitignore` 排除。DOTween DLL、TextMesh Pro 资源、Google.Protobuf DLL、NativeWebSocket 已在仓库中。
-- 缺少的资产及 `ProjectSettings.asset` 放在一个私有 Unity 素材仓库中，仓库根目录保持 `Assets/` 和 `ProjectSettings/` 两个目录；workflow 用一个只读 Token checkout 后复制到 `client/`。不要把大型素材压成 Base64 放进 GitHub Secret，GitHub Secret 有 48 KB 限制。
+- 项目根目录提供 `GitHub构建配置模板.txt` 和本地填写文件 `GitHub构建配置.local.txt`，可以直接用记事本修改。大型 Asset Store 素材仓库现在是可选项；没有素材仓库时 workflow 先使用公开客户端源码尝试构建。
 - 直接拿公开仓库在 CI 编译，不等于能获得可运行、美术完整的 APK；必须先通过 C# 编译和场景引用检查。
 
 ## CLI、许可与构建
@@ -23,8 +23,8 @@
   - `.github/workflows/android-build.yml`
   - `client/Assets/Editor/AfkAndroidBuild.cs`
 - x86_64 Linux 的 GitHub Actions runner 可用 `game-ci/unity-builder@v4` + Unity `2021.3.26f1` + Android 模块试打 APK；官方新 CLI 的 `unity ci init` 生成的 workflow 需要 Unity 服务账号和许可序列号，GameCI workflow 更适合免费 Personal 许可。
-- GitHub 构建需要先配置这些 Secrets：`UNITY_EMAIL`、`UNITY_PASSWORD`、`AFK_ASSETS_REPO`、`AFK_ASSETS_TOKEN`。Personal seat 由 `game-ci/unity-builder@v4` 在 runner 上申请并在构建结束时归还。如果要生成可覆盖安装的 release APK，再配置 `ANDROID_KEYSTORE_NAME`、`ANDROID_KEYSTORE_BASE64`、`ANDROID_KEYSTORE_PASS`、`ANDROID_KEYALIAS_NAME`、`ANDROID_KEYALIAS_PASS`。
-- 私有素材仓库根目录必须包含 `Assets/ThirdParty` 和 `ProjectSettings/ProjectSettings.asset`，还要包含 README 要求的其他合法 Asset Store 导入文件。`AFK_ASSETS_TOKEN` 只需要该私有仓库的 `Contents: Read` 权限。
+- GitHub 构建至少需要 `UNITY_EMAIL`、`UNITY_PASSWORD`。素材仓库存在时再配置 `AFK_ASSETS_REPO`、`AFK_ASSETS_TOKEN`；Personal seat 由 `game-ci/unity-builder@v4` 在 runner 上申请并在构建结束时归还。如果要生成可覆盖安装的 release APK，再配置 Android keystore 字段。
+- 以后配置私有素材仓库时，根目录必须包含 `Assets/ThirdParty` 和 `ProjectSettings/ProjectSettings.asset`，还要包含 README 要求的其他合法 Asset Store 导入文件。大型素材不要放进 Secret，Token 只需要该私有仓库的 `Contents: Read` 权限。
 - 2026-11-15 在 fork 上实测：Android workflow 能启动；旧的 `game-ci/unity-request-activation-file@v2` 已实测返回“不再支持”，所以已删除该 activation workflow。远端 Ubuntu 24.04 x86_64 已实测 Personal 激活成功并读回，随后已执行 `license return` 和 `auth logout` 释放席位；本机 ARM64 CLI 仍不支持 licensing client。
 - 验收状态：源码取证、fork、workflow/YAML 语法检查和 Actions 前置检查完成；Editor 启动、许可激活、C# 编译、APK 产物和客户端/服务端联机仍未完成，不把配置存在当作构建通过。
 
