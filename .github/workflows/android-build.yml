@@ -45,7 +45,8 @@ jobs:
       - name: Build APK
         uses: game-ci/unity-builder@v4
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          # Current GameCI CLI acquires a Unity Personal seat directly from
+          # the account. No legacy .ulf secret is needed for Personal mode.
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:

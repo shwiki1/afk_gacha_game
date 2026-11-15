@@ -18,14 +18,14 @@
 
 - 本机 Unity CLI `1.0.0` 已安装；`~/.local/bin/unity` 是通过 `grun` 调用官方 ARM64 二进制的 Termux 启动脚本。`unity --version` 已实测返回 `1.0.0`。
 - `unity doctor` 在这台 Linux arm64 手机上把 `licensingClient` 标成 `unsupported-platform`；`license status` 返回 `LICENSING_CLIENT_UNAVAILABLE`，未登录。`editors info 6000.6.9f1 --architecture arm64` 的 `downloadUrl` 为 `null`，Editor 列表为空。因此本机未完成 Unity Editor / 许可安装，也没有生成或验收 APK。
-- Unity Personal 对最近 12 个月总收入与融资低于 20 万美元的个人/小组织免费；超过门槛须用付费方案。Personal 许可通过 Unity Hub 登录并点「Get a free personal license」激活；老版本 Unity 的 `.alf/.ulf` 手动激活页面明确只适用于非 Personal 且有序列号的方案。GameCI 文档要求在桌面 Hub 激活后取 `.ulf`，把 `UNITY_LICENSE`、`UNITY_EMAIL`、`UNITY_PASSWORD` 放入仓库 Secrets。
+- Unity Personal 对最近 12 个月总收入与融资低于 20 万美元的个人/小组织免费；超过门槛须用付费方案。当前 GameCI CLI 支持用 `UNITY_EMAIL` + `UNITY_PASSWORD` 在 x86_64 runner 上直接申请 Personal seat，不需要把新版 `UnityEntitlementLicense.xml` 当作旧式 `.ulf` 使用。
 - 构建 workflow 与 Unity 静态构建入口已经写入本地工作区：
   - `.github/workflows/android-build.yml`
   - `client/Assets/Editor/AfkAndroidBuild.cs`
 - x86_64 Linux 的 GitHub Actions runner 可用 `game-ci/unity-builder@v4` + Unity `2021.3.26f1` + Android 模块试打 APK；官方新 CLI 的 `unity ci init` 生成的 workflow 需要 Unity 服务账号和许可序列号，GameCI workflow 更适合免费 Personal 许可。
-- GitHub 构建需要先配置这些 Secrets：`UNITY_LICENSE`、`UNITY_EMAIL`、`UNITY_PASSWORD`、`AFK_ASSETS_ARCHIVE_BASE64`。如果要生成可覆盖安装的 release APK，再配置 `ANDROID_KEYSTORE_NAME`、`ANDROID_KEYSTORE_BASE64`、`ANDROID_KEYSTORE_PASS`、`ANDROID_KEYALIAS_NAME`、`ANDROID_KEYALIAS_PASS`。
+- GitHub 构建需要先配置这些 Secrets：`UNITY_EMAIL`、`UNITY_PASSWORD`、`AFK_ASSETS_ARCHIVE_BASE64`。Personal seat 由 `game-ci/unity-builder@v4` 在 runner 上申请并在构建结束时归还。如果要生成可覆盖安装的 release APK，再配置 `ANDROID_KEYSTORE_NAME`、`ANDROID_KEYSTORE_BASE64`、`ANDROID_KEYSTORE_PASS`、`ANDROID_KEYALIAS_NAME`、`ANDROID_KEYALIAS_PASS`。
 - `AFK_ASSETS_ARCHIVE_BASE64` 必须是一个 `.tar.gz` 的 Base64 内容，解压根目录对应 `client/`，至少恢复 README 要求的 Asset Store 依赖和被 `.gitignore` 排除的 `client/ProjectSettings/ProjectSettings.asset`。
-- 2026-11-15 在 fork 上实测：Android workflow 能启动，但在缺少 `AFK_ASSETS_ARCHIVE_BASE64` 时按设计停止；旧的 `game-ci/unity-request-activation-file@v2` 已实测返回“不再支持”，所以已删除该 activation workflow。当前 Personal 许可只能通过 Unity Hub 取得 `.ulf` 后放进 `UNITY_LICENSE`；本机 ARM64 CLI 无法替代 Hub。
+- 2026-11-15 在 fork 上实测：Android workflow 能启动，但在缺少 `AFK_ASSETS_ARCHIVE_BASE64` 时按设计停止；旧的 `game-ci/unity-request-activation-file@v2` 已实测返回“不再支持”，所以已删除该 activation workflow。远端 Ubuntu 24.04 x86_64 已实测 Personal 激活成功并读回，随后已执行 `license return` 和 `auth logout` 释放席位；本机 ARM64 CLI 仍不支持 licensing client。
 - 验收状态：源码取证、fork、workflow/YAML 语法检查和 Actions 前置检查完成；Editor 启动、许可激活、C# 编译、APK 产物和客户端/服务端联机仍未完成，不把配置存在当作构建通过。
 
 ## 相关链接
