@@ -45,6 +45,13 @@ public static class AfkAndroidBuild
             options = BuildOptions.None
         };
 
+        // The development device is arm64-v8a-only. Keep the CI artifact
+        // installable there and use the workflow run number for upgrades.
+        PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
+        var versionCode = GetArgument("-androidVersionCode", "");
+        if (int.TryParse(versionCode, out var parsedVersionCode) && parsedVersionCode > 0)
+            PlayerSettings.Android.bundleVersionCode = parsedVersionCode;
+
         var report = BuildPipeline.BuildPlayer(options);
         var summary = report.summary;
         Debug.Log($"AFK Android build: {summary.result}, output={summary.outputPath}, " +
