@@ -127,6 +127,7 @@ $RECYCLE.BIN/
 client/ProjectSettings/ProjectSettings.asset
 .env
 .env.*
+GitHub构建配置.local.txt
 
 # Ignore Visual Studio Code configuration
 .vscode

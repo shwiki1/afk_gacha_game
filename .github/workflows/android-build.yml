@@ -18,19 +18,23 @@ jobs:
         with:
           submodules: false
 
-      # Keep licensed Asset Store files in a private repository. A large
-      # Base64 archive cannot fit in GitHub's repository Secret size limit.
-      - name: Checkout private Unity assets
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ secrets.AFK_ASSETS_REPO }}
-          token: ${{ secrets.AFK_ASSETS_TOKEN }}
-          ref: main
-          path: .afk-private-assets
-          persist-credentials: false
-
-      - name: Restore Unity project dependencies
+      # Licensed Asset Store files are optional for the first public-source
+      # build. When a private asset repository is configured, restore it here.
+      - name: Restore optional private Unity assets
+        env:
+          AFK_ASSETS_REPO: ${{ secrets.AFK_ASSETS_REPO }}
+          AFK_ASSETS_TOKEN: ${{ secrets.AFK_ASSETS_TOKEN }}
         run: |
+          if [ -z "$AFK_ASSETS_REPO" ] || [ -z "$AFK_ASSETS_TOKEN" ]; then
+            echo "::notice::No private asset repository configured; using the public client checkout."
+            exit 0
+          fi
+          export GIT_CONFIG_COUNT=1
+          export GIT_CONFIG_KEY_0=http.https://github.com/.extraheader
+          export GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$AFK_ASSETS_TOKEN" | base64 -w0)"
+          git clone --depth 1 --branch main \
+            "https://github.com/$AFK_ASSETS_REPO.git" .afk-private-assets
+          unset GIT_CONFIG_COUNT GIT_CONFIG_KEY_0 GIT_CONFIG_VALUE_0 AFK_ASSETS_TOKEN
           test -f .afk-private-assets/ProjectSettings/ProjectSettings.asset
           test -d .afk-private-assets/Assets/ThirdParty
           rsync -a .afk-private-assets/Assets/ client/Assets/
