@@ -1,12 +1,8 @@
 name: Build AFK Gacha Android APK
 
 on:
+  # Run manually after the Unity and project dependency secrets are configured.
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'client/**'
-      - '.github/workflows/android-build.yml'
 
 concurrency:
   group: afk-android-${{ github.ref }}
