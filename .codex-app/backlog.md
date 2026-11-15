@@ -1,7 +1,6 @@
 # Backlog
 
 ## Ready
-- Run a new Android Actions build from the fork after the WebSocket startup fix.
 - Verify the resulting APK and install it on a connected Android device.
 
 ## Blocked

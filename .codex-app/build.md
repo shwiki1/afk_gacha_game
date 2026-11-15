@@ -32,7 +32,7 @@
 ## Test Matrix
 - Source checks: changed scripts reviewed and endpoint/state transitions inspected.
 - Network smoke: WebSocket `101/open` handshake to `ws://156.254.7.63:4001/2` passed.
-- CI build: pending for the current source fix.
+- CI build: passed, run `43769884864` in `17m24s`.
 - APK checks after CI: ABI, versionCode, `unzip -t`, `zipalign`, `apksigner`, and SHA-256.
 - Device smoke: pending a connected Android device; install and logcat are required for final launch-loop confirmation.
 
@@ -44,3 +44,4 @@
 ## Notes
 - The public working tree is sparse; GitHub Actions checks out the full repository and restores private assets only when configured.
 - Use GitHub Actions for native packaging and keep secrets out of commits.
+- Current artifact: `构建产物/43769884864/Android/AFKGacha.apk`, versionCode `12`, SHA-256 `120cefb6a02adeba6bd8d30ddb131b43f7954a0dd41ab7d6e60914263949c39f`.
