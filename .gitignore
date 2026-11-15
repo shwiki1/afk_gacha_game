@@ -125,6 +125,8 @@ $RECYCLE.BIN/
 ## Dev ##
 *.todo
 client/ProjectSettings/ProjectSettings.asset
+.env
+.env.*
 
 # Ignore Visual Studio Code configuration
 .vscode
