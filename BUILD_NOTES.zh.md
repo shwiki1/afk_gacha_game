@@ -23,7 +23,10 @@
   - `.github/workflows/android-build.yml`
   - `client/Assets/Editor/AfkAndroidBuild.cs`
 - x86_64 Linux 的 GitHub Actions runner 可用 `game-ci/unity-builder@v4` + Unity `2021.3.26f1` + Android 模块试打 APK；官方新 CLI 的 `unity ci init` 生成的 workflow 需要 Unity 服务账号和许可序列号，GameCI workflow 更适合免费 Personal 许可。
-- 验收状态：源码取证与 workflow/YAML 语法检查完成；Editor 启动、许可激活、C# 编译、APK 产物和客户端/服务端联机均为 0%，不把配置存在当作构建通过。
+- GitHub 构建需要先配置这些 Secrets：`UNITY_LICENSE`、`UNITY_EMAIL`、`UNITY_PASSWORD`、`AFK_ASSETS_ARCHIVE_BASE64`。如果要生成可覆盖安装的 release APK，再配置 `ANDROID_KEYSTORE_NAME`、`ANDROID_KEYSTORE_BASE64`、`ANDROID_KEYSTORE_PASS`、`ANDROID_KEYALIAS_NAME`、`ANDROID_KEYALIAS_PASS`。
+- `AFK_ASSETS_ARCHIVE_BASE64` 必须是一个 `.tar.gz` 的 Base64 内容，解压根目录对应 `client/`，至少恢复 README 要求的 Asset Store 依赖和被 `.gitignore` 排除的 `client/ProjectSettings/ProjectSettings.asset`。
+- 2026-11-15 在 fork 上实测：Android workflow 能启动，但在缺少 `AFK_ASSETS_ARCHIVE_BASE64` 时按设计停止；旧的 `game-ci/unity-request-activation-file@v2` 已实测返回“不再支持”，所以已删除该 activation workflow。当前 Personal 许可只能通过 Unity Hub 取得 `.ulf` 后放进 `UNITY_LICENSE`；本机 ARM64 CLI 无法替代 Hub。
+- 验收状态：源码取证、fork、workflow/YAML 语法检查和 Actions 前置检查完成；Editor 启动、许可激活、C# 编译、APK 产物和客户端/服务端联机仍未完成，不把配置存在当作构建通过。
 
 ## 相关链接
 
