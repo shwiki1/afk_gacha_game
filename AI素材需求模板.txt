@@ -1,0 +1,31 @@
+# 只描述你想要的素材，不需要填写 Unity 路径或 .meta 文件。
+# 复制为「AI素材需求.local.txt」后用记事本填写。
+# 每个 [asset] ... [/asset] 是一项素材。
+
+[asset]
+name=示例角色头像
+category=portrait
+description=二次元奇幻女角色，银白长发，蓝色眼睛，轻甲，正面半身
+style=精致赛璐璐、清晰线稿、幻想 RPG、透明背景
+width=1024
+height=1024
+transparent=true
+count=1
+notes=不要文字、不要水印、保留完整头发和肩部
+[/asset]
+
+[asset]
+name=示例角色图标
+category=icon
+description=火焰属性魔法核心，圆形构图，明亮红橙色能量
+style=游戏 UI 图标、清晰轮廓、透明背景
+width=512
+height=512
+transparent=true
+count=1
+notes=不要文字、不要边框外溢
+[/asset]
+
+# 可用 category：portrait / character / icon / ui / background / map / vfx
+# portrait：角色头像；character：立绘或全身角色；icon：道具和属性图标
+# ui：按钮、面板、卡框；background：场景背景；map：地图素材；vfx：特效贴图
