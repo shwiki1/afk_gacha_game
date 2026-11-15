@@ -1,7 +1,7 @@
 # Backlog
 
 ## Ready
-- Verify the resulting APK and install it on a connected Android device.
+- Install versionCode 13 and verify the rendered scene on a connected Android device.
 
 ## Blocked
 - Real-device launch/logcat verification is blocked until an Android device is connected over ADB.

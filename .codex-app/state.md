@@ -1,6 +1,6 @@
 # Current App State
 
-Last updated: 2026-11-15 22:52 UTC
+Last updated: 2026-11-15 23:10 UTC
 
 ## Current Truth
 - App: afk_gacha_game
@@ -11,17 +11,18 @@ Last updated: 2026-11-15 22:52 UTC
 - Build branch: `main` on `shwiki1/afk_gacha_game`
 - Cloud build: `.github/workflows/android-build.yml`; formatting workflow: `.github/workflows/dotnet-format.yml`
 - App version: `1.0`
-- Build number: `12`
-- Last completed build number: `12`
-- Last completed artifact: `构建产物/43769884864/Android/AFKGacha.apk`
-- Last artifact SHA-256: `120cefb6a02adeba6bd8d30ddb131b43f7954a0dd41ab7d6e60914263949c39f`
+- Build number: `13`
+- Last completed build number: `13`
+- Last completed artifact: `构建产物/43773761459/Android/AFKGacha.apk`
+- Last artifact SHA-256: `482b9d39b8da92e7dd38f989bc93e7c77fe7f5d0543f6e96eed9603dfd5c7a6e`
 
 ## Active Task
-- Android startup fix is implemented and built; only real-device launch/logcat verification remains.
+- Android startup and black-screen fixes are implemented and built; only real-device launch/logcat verification remains.
 
 ## Recently Changed
 - `client/Assets/Scripts/BackendConnection/ServerSelect.cs`: Android default endpoint is `ws://156.254.7.63:4001`; static defaults and input validation added.
 - `client/Assets/Scripts/BackendConnection/SocketConnection.cs`: one-frame startup delay, connection state tracking, URL validation, duplicate protection, and exception-safe close handling added.
+- `client/Assets/Scripts/Shared/RuntimeRenderRepair.cs`: restores zero-scale Canvas transforms and missing Screen Space Camera references after scene load.
 - `.codex-app/`: project memory was bootstrapped and is now being filled with verified facts.
 
 ## Checks
@@ -29,8 +30,9 @@ Last updated: 2026-11-15 22:52 UTC
 - Gateway root `http://156.254.7.63:4001/`: 404, expected because the gateway exposes WebSocket routes rather than an HTML root.
 - Local Unity Editor build: unavailable; this Termux device is ARM64 and does not have the project editor installed.
 - Real Android launch/logcat: not run; no ADB device is connected.
-- GitHub Actions build after this fix: passed, run `43769884864`.
+- GitHub Actions build after this fix: passed, run `43773761459`.
 - APK structure/signature checks: passed; v1/v2 signatures and `arm64-v8a` verified.
+- APK metadata contains `RuntimeRenderRepair` and its diagnostic log string.
 
 ## Memory Validation
 - Source paths, workflow, project version, prior artifact metadata, and remote server endpoint were checked against the repository and live endpoints.
@@ -42,5 +44,5 @@ Last updated: 2026-11-15 22:52 UTC
 - `.env` and local configuration files contain machine-only values and must stay untracked.
 
 ## Next Actions
-- Install the APK on a connected Android device and collect logcat if the launch loop persists.
+- Install `versionCode 13` on a connected Android device and collect logcat if the black screen persists.
 - If the device rejects cleartext WebSocket traffic, configure a stable `wss://` endpoint or Android network security policy.
