@@ -1,0 +1,37 @@
+# AFK Gacha 本地构建说明
+
+## 项目与服务端
+
+- 客户端：`Lambda-Forge/afk_gacha_game`，HEAD `116227e`（2024-06-12），Apache-2.0；音乐/图形按 README 为 CC 署名且相同方式共享。
+- 服务端：`lambdaclass/mirra_backend`，Apache-2.0。客户端 `SocketConnection` 启动即连接 `ws://localhost:4001/2`（Editor）或自定义/欧洲测试服，登录、抽卡、养成、战役和挂机奖励都依赖 WebSocket 网关；因此必须有服务端。
+- 客户端 `ProjectVersion.txt` 锁定 Unity `2021.3.26f1`。
+- 协议基线：使用服务端历史分支 `origin/gh-437-get-dungeon-afk-rewards`（tip `a6d76fd3`），它包含客户端所需的 `GetDungeonAfkRewards`。主分支 HEAD `03ce828` 已删除该请求，且将字段 17 从 `LevelUpItem` 改为 `FuseItems`、字段 6 从 `supply_limit` 改为 `supply_cap`，不能直接与当前客户端混用。历史分支与客户端协议仍存在新增字段差异；未做实机联机验收。
+
+## 源码与素材
+
+- 客户端公开仓库约 1473 个文件，包含脚本、场景、贴图、模型、音频、`Packages` 与大部分 `ProjectSettings`。本机检出为 sparse checkout，只展开了脚本、工程设置、Editor、workflow 目录。
+- README 要求自行购买/下载并导入 8 组 Asset Store 素材到 `client/Assets/ThirdParty`；仓库里仅保留了少量目录 `.meta`，`client/ProjectSettings/ProjectSettings.asset` 也被 `.gitignore` 排除。DOTween DLL、TextMesh Pro 资源、Google.Protobuf DLL、NativeWebSocket 已在仓库中。
+- 缺少的资产及 `ProjectSettings.asset` 需要合法取得后打成 `.tar.gz`，用 GitHub Secret `AFK_ASSETS_ARCHIVE_BASE64` 提供，`.github/workflows/android-build.yml` 会将其解到 `client/`。
+- 直接拿公开仓库在 CI 编译，不等于能获得可运行、美术完整的 APK；必须先通过 C# 编译和场景引用检查。
+
+## CLI、许可与构建
+
+- 本机 Unity CLI `1.0.0` 已安装；`~/.local/bin/unity` 是通过 `grun` 调用官方 ARM64 二进制的 Termux 启动脚本。`unity --version` 已实测返回 `1.0.0`。
+- `unity doctor` 在这台 Linux arm64 手机上把 `licensingClient` 标成 `unsupported-platform`；`license status` 返回 `LICENSING_CLIENT_UNAVAILABLE`，未登录。`editors info 6000.6.9f1 --architecture arm64` 的 `downloadUrl` 为 `null`，Editor 列表为空。因此本机未完成 Unity Editor / 许可安装，也没有生成或验收 APK。
+- Unity Personal 对最近 12 个月总收入与融资低于 20 万美元的个人/小组织免费；超过门槛须用付费方案。Personal 许可通过 Unity Hub 登录并点「Get a free personal license」激活；老版本 Unity 的 `.alf/.ulf` 手动激活页面明确只适用于非 Personal 且有序列号的方案。GameCI 文档要求在桌面 Hub 激活后取 `.ulf`，把 `UNITY_LICENSE`、`UNITY_EMAIL`、`UNITY_PASSWORD` 放入仓库 Secrets。
+- 构建 workflow 与 Unity 静态构建入口已经写入本地工作区：
+  - `.github/workflows/android-build.yml`
+  - `client/Assets/Editor/AfkAndroidBuild.cs`
+- x86_64 Linux 的 GitHub Actions runner 可用 `game-ci/unity-builder@v4` + Unity `2021.3.26f1` + Android 模块试打 APK；官方新 CLI 的 `unity ci init` 生成的 workflow 需要 Unity 服务账号和许可序列号，GameCI workflow 更适合免费 Personal 许可。
+- 验收状态：源码取证与 workflow/YAML 语法检查完成；Editor 启动、许可激活、C# 编译、APK 产物和客户端/服务端联机均为 0%，不把配置存在当作构建通过。
+
+## 相关链接
+
+- 客户端：https://github.com/Lambda-Forge/afk_gacha_game
+- 服务端：https://github.com/lambdaclass/mirra_backend
+- Unity Personal：https://unity.com/products/unity-personal
+- Unity 软件条款：https://unity.com/legal/editor-terms-of-service/software
+- Unity CLI 安装脚本：https://unity.com/install.sh
+- Unity 技能：https://github.com/Unity-Technologies/skills/blob/main/skills/new-unity-project/SKILL.md
+- GameCI 许可：https://game.ci/docs/github/activation
+- GameCI builder：https://game.ci/docs/github/builder
