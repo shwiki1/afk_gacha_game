@@ -51,7 +51,7 @@ jobs:
             afk-library-${{ runner.os }}-2021.3.26f1-
 
       - name: Build APK
-        uses: game-ci/unity-builder@v4
+        uses: game-ci/unity-builder@v6
         env:
           # Current GameCI CLI acquires a Unity Personal seat directly from
           # the account. No legacy .ulf secret is needed for Personal mode.

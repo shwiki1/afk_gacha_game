@@ -6,13 +6,13 @@ the workflow actions run in CI and are not copied into the Android player.
 
 ## GameCI Unity Builder
 
-- Version: `v4`
+- Version: `v6`
 - License: MIT
 - Used as: GitHub Actions build action
 - Upstream: https://github.com/game-ci/unity-builder
-- Source for distributed binary: https://github.com/game-ci/unity-builder/tree/v4
+- Source for distributed binary: https://github.com/game-ci/unity-builder/tree/v6
 - Modifications: none
-- Required notices: https://github.com/game-ci/unity-builder/blob/v4/LICENSE
+- Required notices: https://github.com/game-ci/unity-builder/blob/v6/LICENSE
 
 ## GitHub Actions checkout
 
