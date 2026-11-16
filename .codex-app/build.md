@@ -11,14 +11,15 @@
 - Workflow: `.github/workflows/android-build.yml`
 - Runner: `ubuntu-22.04` x86_64
 - Unity builder: `game-ci/unity-builder@v6`, editor `2022.3.62f3`, Android IL2CPP arm64
+- Unity packages: URP/Core/ShaderGraph/VFX `14.0.12`; Android graphics API is explicitly GLES3.
 - Build method: `AfkAndroidBuild.Build`
 - Artifact: `AFKGacha-Android`, APK under `build/**/*.apk`
 - Build number: GitHub Actions `github.run_number` becomes Android `versionCode`
-- Prior successful run: `43773761459`, versionCode `13`
+- Prior successful run: `43806724103`, versionCode `16`
 
 ## Version Management
 - Canonical version file: `client/ProjectSettings/ProjectSettings.asset`.
-- Current build number: `13`.
+- Current build number: `16`.
 - User-facing version source: `client/ProjectSettings/ProjectSettings.asset` when the full checkout is present; current value is `1.0`.
 - Build number source: workflow `androidVersionCode: ${{ github.run_number }}`.
 - Version bump policy: increment the cloud build number for every APK; change user-facing version only for a release change.
@@ -34,9 +35,9 @@
 ## Test Matrix
 - Source checks: changed scripts reviewed and endpoint/state transitions inspected.
 - Network smoke: WebSocket `101/open` handshake to `ws://156.254.7.63:4001/2` passed.
-- CI build: passed, run `43773761459` in `14m39s`.
+- CI build: passed, run `43806724103` in `9m36s`.
 - APK checks after CI: ABI, versionCode, `unzip -t`, `zipalign`, `apksigner`, and SHA-256.
-- Device smoke: pending a connected Android device; install and logcat are required for final launch-loop confirmation.
+- Device smoke: passed on Xiaomi 2311DRK48C / Android SDK 36 using wireless ADB `192.168.31.227:38399`; map/UI visible and no URP NRE.
 
 ## Required Secrets
 - `UNITY_EMAIL`, `UNITY_PASSWORD`
@@ -46,4 +47,4 @@
 ## Notes
 - The public working tree is sparse; GitHub Actions checks out the full repository and restores private assets only when configured.
 - Use GitHub Actions for native packaging and keep secrets out of commits.
-- Current artifact: `构建产物/43773761459/Android/AFKGacha.apk`, versionCode `13`, SHA-256 `482b9d39b8da92e7dd38f989bc93e7c77fe7f5d0543f6e96eed9603dfd5c7a6e`.
+- Current artifact: `构建产物/43806724103/Android/AFKGacha.apk`, versionCode `16`, SHA-256 `eafb8acae88d854859e06a81057752e563a795eb257bc0c42ae0ce69a2a3a8c7`.
