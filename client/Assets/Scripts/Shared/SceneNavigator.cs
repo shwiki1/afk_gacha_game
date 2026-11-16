@@ -20,6 +20,13 @@ public class SceneNavigator : MonoBehaviour
 
     public void ChangeToScene(string targetSceneName)
     {
+        Debug.Log($"SceneNavigator.ChangeToScene requested: {SceneManager.GetActiveScene().name} -> {targetSceneName}");
+        if (string.IsNullOrWhiteSpace(targetSceneName) || !Application.CanStreamedLevelBeLoaded(targetSceneName))
+        {
+            Debug.LogError($"SceneNavigator cannot load scene: {targetSceneName}");
+            return;
+        }
+
         if (sceneHistory.Contains(targetSceneName))
         {
             while (targetSceneName != sceneHistory.Peek())
@@ -34,6 +41,7 @@ public class SceneNavigator : MonoBehaviour
         }
 
         SceneManager.LoadScene(targetSceneName);
+        Debug.Log($"SceneNavigator.LoadScene issued: {targetSceneName}");
     }
 
     public void BackToPreviousScene()
