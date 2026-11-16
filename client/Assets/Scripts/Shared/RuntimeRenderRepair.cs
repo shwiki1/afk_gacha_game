@@ -1,9 +1,26 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 
 // Repairs legacy scene data that can make every Canvas element render at zero
 // scale on Android while audio and the rest of the scene continue running.
 public static class RuntimeRenderRepair
 {
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    static void ConfigureAndroidRenderPipeline()
+    {
+        if (Application.platform != RuntimePlatform.Android)
+        {
+            return;
+        }
+
+        // The device still reports a URP NRE before the first scene camera
+        // renders. The game is 2D/UI-driven, so use Unity's built-in path on
+        // Android until the URP asset chain is repaired independently.
+        GraphicsSettings.defaultRenderPipeline = null;
+        QualitySettings.renderPipeline = null;
+        Debug.Log("RuntimeRenderRepair selected the built-in Android render pipeline.");
+    }
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void RepairActiveScene()
     {
