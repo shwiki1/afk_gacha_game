@@ -83,6 +83,7 @@ internal sealed class RuntimeTouchBridge : MonoBehaviour
     private EventSystem pointerEventSystem;
     private GameObject pressedObject;
     private int pointerId = -1000;
+    private float nextAssetRepairTime;
 
     public static void Install()
     {
@@ -100,6 +101,12 @@ internal sealed class RuntimeTouchBridge : MonoBehaviour
 
     private void Update()
     {
+        if (Time.unscaledTime >= nextAssetRepairTime)
+        {
+            RuntimeLocationCardRepair.Apply();
+            nextAssetRepairTime = Time.unscaledTime + 1f;
+        }
+
         if (!TryReadPointerFrame(out var position, out var pressed, out var released, out var currentPointerId))
         {
             return;
@@ -343,8 +350,14 @@ internal sealed class RuntimeTouchBridge : MonoBehaviour
 // the project-owned replacement only for the six 350x350 location buttons.
 internal static class RuntimeLocationCardRepair
 {
-    private const string ResourcePath = "UI/afk_location_card";
+    private const string LocationResourcePath = "UI/afk_location_card";
+    private const string PanelResourcePath = "UI/afk_ui_panel";
+    private const string ButtonResourcePath = "UI/afk_ui_button";
+    private const string IconResourcePath = "UI/afk_ui_icon";
     private static Sprite locationCardSprite;
+    private static Sprite panelSprite;
+    private static Sprite buttonSprite;
+    private static Sprite iconSprite;
     private static bool attemptedLoad;
 
     public static void Apply()
@@ -352,60 +365,89 @@ internal static class RuntimeLocationCardRepair
         if (!attemptedLoad)
         {
             attemptedLoad = true;
-            locationCardSprite = Resources.Load<Sprite>(ResourcePath);
+            locationCardSprite = LoadSprite(LocationResourcePath);
+            panelSprite = LoadSprite(PanelResourcePath);
+            buttonSprite = LoadSprite(ButtonResourcePath);
+            iconSprite = LoadSprite(IconResourcePath);
 
-            if (locationCardSprite == null)
+            if (locationCardSprite == null && panelSprite == null && buttonSprite == null && iconSprite == null)
             {
-                var texture = Resources.Load<Texture2D>(ResourcePath);
-                if (texture != null)
-                {
-                    locationCardSprite = Sprite.Create(
-                        texture,
-                        new Rect(0, 0, texture.width, texture.height),
-                        new Vector2(0.5f, 0.5f),
-                        100f,
-                        0,
-                        SpriteMeshType.FullRect);
-                }
-            }
-
-            if (locationCardSprite == null)
-            {
-                Debug.LogWarning($"RuntimeLocationCardRepair could not load Resources/{ResourcePath}.");
+                Debug.LogWarning("RuntimeLocationCardRepair could not load generated UI resources.");
                 return;
             }
         }
 
         var repaired = 0;
-        foreach (var button in Object.FindObjectsOfType<Button>())
+        foreach (var image in Object.FindObjectsOfType<Image>())
         {
-            var rectTransform = button.transform as RectTransform;
-            if (rectTransform == null)
+            if (image.sprite != null)
             {
                 continue;
             }
 
+            var rectTransform = image.rectTransform;
             var size = rectTransform.rect.size;
-            if (Mathf.Abs(size.x - 350f) > 2f || Mathf.Abs(size.y - 350f) > 2f)
+            var parentButton = image.GetComponentInParent<Button>();
+            var parentButtonRect = parentButton == null ? null : parentButton.transform as RectTransform;
+            var isLocationCard = parentButtonRect != null &&
+                Mathf.Abs(parentButtonRect.rect.width - 350f) <= 2f &&
+                Mathf.Abs(parentButtonRect.rect.height - 350f) <= 2f;
+
+            var replacement = isLocationCard
+                ? locationCardSprite
+                : SelectGenericSprite(image.gameObject.name, size);
+            if (replacement == null)
             {
                 continue;
             }
 
-            foreach (var image in button.GetComponentsInChildren<Image>(true))
-            {
-                if (image.sprite != null)
-                {
-                    continue;
-                }
-
-                image.sprite = locationCardSprite;
-                repaired++;
-            }
+            image.sprite = replacement;
+            repaired++;
         }
 
         if (repaired > 0)
         {
-            Debug.Log($"RuntimeLocationCardRepair restored {repaired} missing location card sprite(s).");
+            Debug.Log($"RuntimeLocationCardRepair restored {repaired} missing UI sprite(s).");
         }
+    }
+
+    private static Sprite SelectGenericSprite(string objectName, Vector2 size)
+    {
+        var name = objectName.ToLowerInvariant();
+        if (name.Contains("icon") || name.Contains("rank") || name.Contains("faction") ||
+            (Mathf.Abs(size.x - size.y) < Mathf.Max(16f, size.x * 0.15f) && size.x <= 220f))
+        {
+            return iconSprite ?? panelSprite;
+        }
+
+        if (size.x > size.y * 1.8f || name.Contains("button") || name.Contains("bar") || name.Contains("separator"))
+        {
+            return buttonSprite ?? panelSprite;
+        }
+
+        return panelSprite ?? buttonSprite ?? iconSprite;
+    }
+
+    private static Sprite LoadSprite(string resourcePath)
+    {
+        var sprite = Resources.Load<Sprite>(resourcePath);
+        if (sprite != null)
+        {
+            return sprite;
+        }
+
+        var texture = Resources.Load<Texture2D>(resourcePath);
+        if (texture == null)
+        {
+            return null;
+        }
+
+        return Sprite.Create(
+            texture,
+            new Rect(0, 0, texture.width, texture.height),
+            new Vector2(0.5f, 0.5f),
+            100f,
+            0,
+            SpriteMeshType.FullRect);
     }
 }
