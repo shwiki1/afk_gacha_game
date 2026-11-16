@@ -59,9 +59,9 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           projectPath: client
-          # Match the checked-in project and its URP 12.1.11 package. The
-          # previous 2022.3 override produced a runtime URP NRE on Android.
-          unityVersion: 2021.3.26f1
+          # Match the URP 14.0.12 package and the editor that can acquire a
+          # Personal seat on the GitHub runner. GLES3 is set by AfkAndroidBuild.
+          unityVersion: 2022.3.62f3
           targetPlatform: Android
           buildMethod: AfkAndroidBuild.Build
           buildsPath: build
