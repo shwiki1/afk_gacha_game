@@ -141,6 +141,8 @@ internal sealed class RuntimeTouchBridge : MonoBehaviour
                 Debug.Log($"RuntimeTouchBridge added GraphicRaycaster to {canvas.name}.");
             }
         }
+
+        RuntimeLocationCardRepair.Apply();
     }
 
     private bool TryReadPointerFrame(out Vector2 position, out bool pressed, out bool released, out int currentPointerId)
@@ -334,5 +336,76 @@ internal sealed class RuntimeTouchBridge : MonoBehaviour
         }
 
         return null;
+    }
+}
+
+// Public builds do not include the original Asset Store location sprites. Use
+// the project-owned replacement only for the six 350x350 location buttons.
+internal static class RuntimeLocationCardRepair
+{
+    private const string ResourcePath = "UI/afk_location_card";
+    private static Sprite locationCardSprite;
+    private static bool attemptedLoad;
+
+    public static void Apply()
+    {
+        if (!attemptedLoad)
+        {
+            attemptedLoad = true;
+            locationCardSprite = Resources.Load<Sprite>(ResourcePath);
+
+            if (locationCardSprite == null)
+            {
+                var texture = Resources.Load<Texture2D>(ResourcePath);
+                if (texture != null)
+                {
+                    locationCardSprite = Sprite.Create(
+                        texture,
+                        new Rect(0, 0, texture.width, texture.height),
+                        new Vector2(0.5f, 0.5f),
+                        100f,
+                        0,
+                        SpriteMeshType.FullRect);
+                }
+            }
+
+            if (locationCardSprite == null)
+            {
+                Debug.LogWarning($"RuntimeLocationCardRepair could not load Resources/{ResourcePath}.");
+                return;
+            }
+        }
+
+        var repaired = 0;
+        foreach (var button in Object.FindObjectsOfType<Button>())
+        {
+            var rectTransform = button.transform as RectTransform;
+            if (rectTransform == null)
+            {
+                continue;
+            }
+
+            var size = rectTransform.rect.size;
+            if (Mathf.Abs(size.x - 350f) > 2f || Mathf.Abs(size.y - 350f) > 2f)
+            {
+                continue;
+            }
+
+            foreach (var image in button.GetComponentsInChildren<Image>(true))
+            {
+                if (image.sprite != null)
+                {
+                    continue;
+                }
+
+                image.sprite = locationCardSprite;
+                repaired++;
+            }
+        }
+
+        if (repaired > 0)
+        {
+            Debug.Log($"RuntimeLocationCardRepair restored {repaired} missing location card sprite(s).");
+        }
     }
 }
