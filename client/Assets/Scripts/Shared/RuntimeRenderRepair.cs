@@ -80,6 +80,7 @@ internal sealed class RuntimeTouchBridge : MonoBehaviour
     private static readonly List<RaycastResult> raycastResults = new List<RaycastResult>();
 
     private PointerEventData pointerData;
+    private EventSystem pointerEventSystem;
     private GameObject pressedObject;
     private int pointerId = -1000;
 
@@ -185,8 +186,8 @@ internal sealed class RuntimeTouchBridge : MonoBehaviour
             {
                 var touch = Input.GetTouch(0);
                 position = touch.position;
-                pressed = touch.phase == TouchPhase.Began;
-                released = touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled;
+                pressed = touch.phase == UnityEngine.TouchPhase.Began;
+                released = touch.phase == UnityEngine.TouchPhase.Ended || touch.phase == UnityEngine.TouchPhase.Canceled;
                 currentPointerId = -1000 - touch.fingerId;
                 return true;
             }
@@ -200,7 +201,7 @@ internal sealed class RuntimeTouchBridge : MonoBehaviour
                 return true;
             }
         }
-        catch (InvalidOperationException)
+        catch (System.InvalidOperationException)
         {
             // The new input backend is active and already covered above.
         }
@@ -218,6 +219,7 @@ internal sealed class RuntimeTouchBridge : MonoBehaviour
         }
 
         pointerId = currentPointerId;
+        pointerEventSystem = eventSystem;
         pointerData = new PointerEventData(eventSystem)
         {
             pointerId = currentPointerId,
@@ -257,7 +259,17 @@ internal sealed class RuntimeTouchBridge : MonoBehaviour
         }
 
         pointerData.position = position;
-        var eventSystem = pointerData.eventSystem;
+        var eventSystem = pointerEventSystem != null && pointerEventSystem.isActiveAndEnabled
+            ? pointerEventSystem
+            : FindActiveEventSystem();
+        if (eventSystem == null)
+        {
+            pointerData = null;
+            pressedObject = null;
+            pointerEventSystem = null;
+            return;
+        }
+
         var currentObject = Raycast(eventSystem, pointerData);
         var clickObject = currentObject == null
             ? null
@@ -280,6 +292,7 @@ internal sealed class RuntimeTouchBridge : MonoBehaviour
 
         pointerData = null;
         pressedObject = null;
+        pointerEventSystem = null;
     }
 
     private static GameObject Raycast(EventSystem eventSystem, PointerEventData eventData)
