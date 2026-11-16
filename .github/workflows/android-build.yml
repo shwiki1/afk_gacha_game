@@ -59,9 +59,9 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           projectPath: client
-          # CI override used to test Personal licensing on a supported LTS.
-          # The checked-in project version remains 2021.3.26f1.
-          unityVersion: 2022.3.62f3
+          # Match the checked-in project and its URP 12.1.11 package. The
+          # previous 2022.3 override produced a runtime URP NRE on Android.
+          unityVersion: 2021.3.26f1
           targetPlatform: Android
           buildMethod: AfkAndroidBuild.Build
           buildsPath: build

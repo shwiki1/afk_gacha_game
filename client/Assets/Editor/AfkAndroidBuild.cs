@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 // Static build entry point for headless Unity / GameCI.
 // The scenes come from EditorBuildSettings, so Overworld remains scene 0.
@@ -56,8 +57,15 @@ public static class AfkAndroidBuild
         // Unity's Android ARM64 player requires the IL2CPP backend.
         PlayerSettings.SetScriptingBackend(BuildTargetGroup.Android, ScriptingImplementation.IL2CPP);
         PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
+
+        // The target device's Mali Vulkan driver rejects the framebuffer
+        // formats selected by this project. GLES3 is supported by the device
+        // and avoids the Vulkan-only render failure before the first frame.
+        PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.Android, false);
+        PlayerSettings.SetGraphicsAPIs(BuildTarget.Android, new[] { GraphicsDeviceType.OpenGLES3 });
+        var graphicsApis = string.Join(",", PlayerSettings.GetGraphicsAPIs(BuildTarget.Android));
         Debug.Log($"AFK Android target: {EditorUserBuildSettings.activeBuildTarget}, " +
-                  $"architectures={PlayerSettings.Android.targetArchitectures}");
+                  $"architectures={PlayerSettings.Android.targetArchitectures}, graphicsApis={graphicsApis}");
 
         // Use the workflow run number for upgrades.
         var versionCode = GetArgument("-androidVersionCode", "");
