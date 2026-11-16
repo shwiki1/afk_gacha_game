@@ -23,12 +23,12 @@
 - 构建 workflow 与 Unity 静态构建入口已经写入本地工作区：
   - `.github/workflows/android-build.yml`
   - `client/Assets/Editor/AfkAndroidBuild.cs`
-- x86_64 Linux 的 GitHub Actions runner 使用 `game-ci/unity-builder@v6`、Unity `2022.3.62f3` 和 Android 模块构建 APK；官方新 CLI 的 `unity ci init` 生成的 workflow 需要 Unity 服务账号和许可序列号，GameCI workflow 更适合免费 Personal 许可。工程源码版本仍是 `2021.3.26f1`，CI 版本是为 Personal 激活和当前构建镜像的兼容性测试而设置的覆盖值。
-- GitHub 构建至少需要 `UNITY_EMAIL`、`UNITY_PASSWORD`。素材仓库存在时再配置 `AFK_ASSETS_REPO`、`AFK_ASSETS_TOKEN`；`game-ci/unity-builder@v6` 使用当前 `game-ci/cli` 在 runner 上申请 Personal seat 并在构建结束时归还。如果要生成可覆盖安装的 release APK，再配置 Android keystore 字段。当前 CI 临时使用 Unity `2022.3.62f3` 验证 Personal seat，仓库工程文件仍锁定 `2021.3.26f1`。
+- x86_64 Linux 的 GitHub Actions runner 使用 `game-ci/unity-builder@v6`、Unity `2022.3.62f3` 和 Android 模块构建 APK；官方新 CLI 的 `unity ci init` 生成的 workflow 需要 Unity 服务账号和许可序列号，GameCI workflow 更适合免费 Personal 许可。为解决目标 Android 设备的 URP 运行时异常，URP/Core/ShaderGraph/VFX 已对齐到 `14.0.12`，Android 构建强制使用 GLES3。
+- GitHub 构建至少需要 `UNITY_EMAIL`、`UNITY_PASSWORD`。素材仓库存在时再配置 `AFK_ASSETS_REPO`、`AFK_ASSETS_TOKEN`；`game-ci/unity-builder@v6` 使用当前 `game-ci/cli` 在 runner 上申请 Personal seat 并在构建结束时归还。如果要生成可覆盖安装的 release APK，再配置 Android keystore 字段。
 - 以后配置私有素材仓库时，根目录必须包含 `Assets/ThirdParty` 和 `ProjectSettings/ProjectSettings.asset`，还要包含 README 要求的其他合法 Asset Store 导入文件。大型素材不要放进 Secret，Token 只需要该私有仓库的 `Contents: Read` 权限。
 - 2026-11-15 在 fork 上实测：Android workflow 能启动；旧的 `game-ci/unity-request-activation-file@v2` 已实测返回“不再支持”，所以已删除该 activation workflow。远端 Ubuntu 24.04 x86_64 已实测 Personal 激活成功并读回，随后已执行 `license return` 和 `auth logout` 释放席位；本机 ARM64 CLI 仍不支持 licensing client。
 - 公开源码首次编译还缺少 Asset Store 的 `DuloGames.UIProgressBar` 类型；项目只使用其 `fillAmount`。已加入 `client/Assets/Scripts/ThirdPartyCompat/DuloGamesCompat.cs` 作为独立编写的最小编译兼容层，没有复制 Asset Store 源码；后续可以用 AI 生成的 UI 图形替换进度条外观。
-- 验收状态：GitHub Actions 已完成 Personal 激活、Unity IL2CPP 编译、ARM64 APK 归档和本地 APK 校验；客户端/服务端联机、真实设备安装和完整视觉验收仍未完成。当前 APK 使用默认包名 `com.DefaultCompany.client`、版本 `1.0 (11)`、`arm64-v8a`，并由 Android Debug 证书签名；要做可覆盖升级的正式包，需要配置固定包名、版本号和 Android keystore。
+- 验收状态：GitHub Actions 已完成 Personal 激活、Unity IL2CPP 编译、ARM64 APK 归档和本地 APK 校验；目标 Xiaomi 2311DRK48C 已实机验证 versionCode 16 能显示地图/UI，且不再出现 URP NRE。当前 APK 使用默认包名 `com.DefaultCompany.client`、版本 `1.0 (16)`、`arm64-v8a`，并由 Android Debug 证书签名；要做可覆盖升级的正式包，需要配置固定包名、版本号和 Android keystore。WebSocket 登录链仍需单独排查。
 
 ## 本次构建记录
 
